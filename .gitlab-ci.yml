@@ -30,6 +30,7 @@ test_job:
       -Dorg.slf4j.simpleLogger.showDateTime=true
       -Djava.awt.headless=true
       --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+      
 code_quality_job:
   stage: quality
   allow_failure: true
