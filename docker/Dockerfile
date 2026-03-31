@@ -1,4 +1,4 @@
-FROM openjdk:11-jre as builder
+FROM eclipse-temurin:11-jre-alpine as builder
 WORKDIR application
 ARG ARTIFACT_NAME
 COPY ${ARTIFACT_NAME}.jar application.jar
