@@ -21,7 +21,7 @@ build_job:
 
 test_job:
   stage: test
-  image: eclipse-temurin:17-jdk-alpine
+  image: eclipse-temurin:17-dk-alpine
   script:
     - ./mvnw test
       -Dhttps.protocols=TLSv1.2
