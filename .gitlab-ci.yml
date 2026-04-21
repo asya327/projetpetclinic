@@ -13,22 +13,23 @@ build_job:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
   script:
-    - ./mvnw clean compile --batch-mode --errors --fail-at-end
+    - mvn -version
+    - mvn clean compile --batch-mode -U
 
 test_job:
   stage: test
   image: maven:3.9.6-eclipse-temurin-17
   script:
-    - ./mvnw test --batch-mode
+    - mvn test --batch-mode
 
 packaging_job:
   stage: packaging
   image: maven:3.9.6-eclipse-temurin-17
   script:
-    - ./mvnw package -DskipTests --batch-mode
+    - mvn package -DskipTests --batch-mode
 
 quality_job:
   stage: quality
   image: maven:3.9.6-eclipse-temurin-17
   script:
-    - ./mvnw verify --batch-mode
+    - mvn verify --batch-mode
