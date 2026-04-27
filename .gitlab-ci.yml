@@ -8,23 +8,34 @@ stages:
   - security
   - package
 
+# Cache pour accélérer les builds futurs en stockant les dépendances Maven
 cache:
   paths:
     - .m2/repository
+
+variables:
+  # On définit le chemin local pour le dépôt Maven afin que le cache fonctionne bien
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
 
 # ---------------- BUILD ----------------
 build_job:
   stage: build
   image: eclipse-temurin:17-jdk-alpine
   script:
-    - ./mvnw clean compile -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    # On utilise 'install' et '-U' pour forcer la mise à jour des versions 
+    # et s'assurer que le parent propage la version de Chaos Monkey aux enfants
+    - ./mvnw clean install -DskipTests -U $MAVEN_OPTS
+  artifacts:
+    paths:
+      - .m2/repository
+    expire_in: 1 hour
 
 # ---------------- TEST ----------------
 test_job:
   stage: test
   image: eclipse-temurin:17-jdk-alpine
   script:
-    - ./mvnw test -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    - ./mvnw test $MAVEN_OPTS
 
 # ---------------- QUALITY ----------------
 code_quality_job:
@@ -33,13 +44,19 @@ code_quality_job:
   services:
     - docker:dind
   script:
-    - mkdir codequality-results
-    - docker run --rm -e CODECLIMATE_CODE="$PWD" -v "$PWD":/code -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f html > codequality-results/index.html
+    - mkdir -p codequality-results
+    - docker run --rm \
+        -e CODECLIMATE_CODE="$PWD" \
+        -v "$PWD":/code \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /tmp/cc:/tmp/cc \
+        codeclimate/codeclimate analyze -f html > codequality-results/index.html
   artifacts:
     paths:
       - codequality-results/
   allow_failure: true
 
+# ---------------- PACKAGE ----------------
 package_job:
   stage: package
   image: docker:stable
@@ -50,6 +67,9 @@ package_job:
   script:
     - docker info
     - docker-compose version || true
+    # Ici tu pourrais ajouter tes commandes 'docker build' pour chaque microservice
 
+# ---------------- SECURITY ----------------
 sast:
+  stage: security
   allow_failure: true
