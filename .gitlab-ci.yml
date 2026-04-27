@@ -1,35 +1,55 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 stages:
   - build
   - test
-  - packaging
   - quality
+  - security
+  - package
 
 cache:
-  key: "$CI_JOB_NAME"
   paths:
     - .m2/repository
 
+# ---------------- BUILD ----------------
 build_job:
   stage: build
-  image: maven:3.9.6-eclipse-temurin-17
+  image: eclipse-temurin:17-jdk-alpine
   script:
-    - mvn -version
-    - mvn clean compile --batch-mode -U
+    - ./mvnw clean compile -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
 
+# ---------------- TEST ----------------
 test_job:
   stage: test
-  image: maven:3.9.6-eclipse-temurin-17
+  image: eclipse-temurin:17-jdk-alpine
   script:
-    - mvn test --batch-mode
+    - ./mvnw test -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
 
-packaging_job:
-  stage: packaging
-  image: maven:3.9.6-eclipse-temurin-17
-  script:
-    - mvn package -DskipTests --batch-mode
-
-quality_job:
+# ---------------- QUALITY ----------------
+code_quality_job:
   stage: quality
-  image: maven:3.9.6-eclipse-temurin-17
+  image: docker:stable
+  services:
+    - docker:dind
   script:
-    - mvn verify --batch-mode
+    - mkdir codequality-results
+    - docker run --rm -e CODECLIMATE_CODE="$PWD" -v "$PWD":/code -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f html > codequality-results/index.html
+  artifacts:
+    paths:
+      - codequality-results/
+  allow_failure: true
+
+package_job:
+  stage: package
+  image: docker:stable
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - docker info
+    - docker-compose version || true
+
+sast:
+  allow_failure: true
