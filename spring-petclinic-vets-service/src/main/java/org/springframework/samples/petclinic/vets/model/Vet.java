@@ -31,7 +31,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import
+import jakarta.validation.constraints.NotBlank;
 import javax.xml.bind.annotation.XmlElement;
 
 import lombok.Getter;
