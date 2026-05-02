@@ -16,7 +16,7 @@
     <!-- PROJECT -->
     <groupId>org.springframework.samples</groupId>
     <artifactId>spring-petclinic-microservices</artifactId>
-    <version>2.6.7</version>
+    <version>3.0.3</version>
     <packaging>pom</packaging>
 
     <name>spring-petclinic-microservices</name>
