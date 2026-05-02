@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JAutoConfiguration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.import;
 import org.springframework.samples.petclinic.api.application.CustomersServiceClient;
 import org.springframework.samples.petclinic.api.application.VisitsServiceClient;
 import org.springframework.samples.petclinic.api.dto.OwnerDetails;
@@ -23,7 +23,7 @@ import java.util.Collections;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = ApiGatewayController.class)
-@Import({ReactiveResilience4JAutoConfiguration.class, CircuitBreakerConfiguration.class})
+@import({ReactiveResilience4JAutoConfiguration.class, CircuitBreakerConfiguration.class})
 class ApiGatewayControllerTest {
 
     @MockBean
