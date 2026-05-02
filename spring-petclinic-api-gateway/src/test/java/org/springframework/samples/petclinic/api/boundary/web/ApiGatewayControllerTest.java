@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JAutoConfiguration;
-import org.springframework.context.annotation.import;
+import org.springframework.context.annotation.Import; // CORRECTION ICI : Majuscule sur Import
 import org.springframework.samples.petclinic.api.application.CustomersServiceClient;
 import org.springframework.samples.petclinic.api.application.VisitsServiceClient;
 import org.springframework.samples.petclinic.api.dto.OwnerDetails;
@@ -23,7 +23,8 @@ import java.util.Collections;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = ApiGatewayController.class)
-@import({ReactiveResilience4JAutoConfiguration.class, CircuitBreakerConfiguration.class})
+// CORRECTION ICI : @Import avec une majuscule
+@Import({ReactiveResilience4JAutoConfiguration.class, CircuitBreakerConfiguration.class})
 class ApiGatewayControllerTest {
 
     @MockBean
@@ -61,9 +62,6 @@ class ApiGatewayControllerTest {
             .uri("/api/gateway/owners/1")
             .exchange()
             .expectStatus().isOk()
-            //.expectBody(String.class)
-            //.consumeWith(response ->
-            //    Assertions.assertThat(response.getResponseBody()).isEqualTo("Garfield"));
             .expectBody()
             .jsonPath("$.pets[0].name").isEqualTo("Garfield")
             .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
@@ -95,5 +93,4 @@ class ApiGatewayControllerTest {
             .jsonPath("$.pets[0].name").isEqualTo("Garfield")
             .jsonPath("$.pets[0].visits").isEmpty();
     }
-
 }
