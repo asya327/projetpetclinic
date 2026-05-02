@@ -1,35 +1,76 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 stages:
   - build
   - test
-  - packaging
   - quality
+  - security
+  - package
 
+# Cache pour accélérer les builds futurs en stockant les dépendances Maven
 cache:
-  key: "$CI_JOB_NAME"
   paths:
     - .m2/repository
 
+variables:
+  # On définit le chemin local pour le dépôt Maven afin que le cache fonctionne bien
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+# ---------------- BUILD ----------------
 build_job:
   stage: build
-  image: maven:3.9.6-eclipse-temurin-17
+  image: eclipse-temurin:17-jdk-alpine
   script:
-    - mvn -version
-    - mvn clean compile --batch-mode -U
+    # On utilise 'install' et '-U' pour forcer la mise à jour des versions 
+    # et s'assurer que le parent propage la version de Chaos Monkey aux enfants
+    - ./mvnw clean install -DskipTests -U $MAVEN_OPTS
+  artifacts:
+    paths:
+      - .m2/repository
+    expire_in: 1 hour
 
+# ---------------- TEST ----------------
 test_job:
   stage: test
-  image: maven:3.9.6-eclipse-temurin-17
+  image: eclipse-temurin:17-jdk-alpine
   script:
-    - mvn test --batch-mode
+    - ./mvnw test $MAVEN_OPTS
 
-packaging_job:
-  stage: packaging
-  image: maven:3.9.6-eclipse-temurin-17
-  script:
-    - mvn package -DskipTests --batch-mode
-
-quality_job:
+# ---------------- QUALITY ----------------
+code_quality_job:
   stage: quality
-  image: maven:3.9.6-eclipse-temurin-17
+  image: docker:stable
+  services:
+    - docker:dind
   script:
-    - mvn verify --batch-mode
+    - mkdir -p codequality-results
+    - |
+      docker run --rm \
+        --env CODECLIMATE_CODE="$PWD" \
+        --volume "$PWD":/code \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        --volume /tmp/cc:/tmp/cc \
+        codeclimate/codeclimate analyze -f html > codequality-results/index.html
+  artifacts:
+    paths:
+      - codequality-results/
+  allow_failure: true
+
+# ---------------- PACKAGE ----------------
+package_job:
+  stage: package
+  image: docker:stable
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - docker info
+    - docker-compose version || true
+    # Ici tu pourrais ajouter tes commandes 'docker build' pour chaque microservice
+
+# ---------------- SECURITY ----------------
+sast:
+  stage: security
+  allow_failure: true
