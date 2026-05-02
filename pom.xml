@@ -57,7 +57,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- CHAOS MONKEY (Correction pour l'erreur de build) -->
+            <!-- CHAOS MONKEY -->
             <dependency>
                 <groupId>de.codecentric</groupId>
                 <artifactId>chaos-monkey-spring-boot</artifactId>
@@ -70,6 +70,25 @@
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- AJOUTS POUR CORRIGER LES ERREURS DE VERSION MANQUANTES -->
+            <dependency>
+                <groupId>org.jolokia</groupId>
+                <artifactId>jolokia-core</artifactId>
+                <version>${jolokia.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>${ehcache.version}</version>
             </dependency>
 
         </dependencies>
